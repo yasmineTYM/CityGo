@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>CityGo</title>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+    <script type="text/javascript" src="../d3/d3.min.js"></script>
+<style>
+
+#score
+  {
+  font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;
+  width:300px;
+  border-collapse:collapse;
+  }
+
+#score td, #score th 
+  {
+  font-size:1em;
+  border:1px solid #000000;
+  padding:3px 7px 2px 7px;
+  text-align: center;
+  }
+
+#score th 
+  {
+  font-size:1.1em;
+  text-align:center;
+  padding-top:5px;
+  padding-bottom:4px;
+  background-color:#000000;
+  color:#ffffff;
+  column-width: 10px
+  }
+
+#score tr.alt td 
+  {
+  color:#000000;
+  background-color:#CCCCCC;
+  }
+</style>
+</head>
+<body>    
+    <div id="option">
+    <input name="updateButton" 
+           type="button" 
+           value="Start"
+           class="button" 
+           onclick="start()" />
+    </div>
+    <div id="grid" style="float:left"></div>
+    <div id='chart' style="float:right">
+        <table id="score" style="float:center; margin-left: 50px;">
+            <tr>
+                <th>Role</th>
+                <th>score</th>
+            </tr>
+
+            <tr>
+                <td>Mayor</td>
+                <td>12</td>
+            </tr>
+
+            <tr class="alt">
+                <td>Planner</td>
+                <td>15</td>
+            </tr>
+
+            <tr>
+                <td>Capital</td>
+                <td>21</td>
+            </tr>
+
+            <tr class="alt">
+                <td>Residence</td>
+                <td>23</td>
+            </tr>
+
+            <tr>
+                <td><b>Total</b></td>
+                <td></td>
+            </tr>
+
+        </table>
+    </div>
+    <script>
+
+var margin = {top: 30, right: 20, bottom: 30, left: 50},
+    width = 630 - margin.left - margin.right,
+    height = 270 - margin.top - margin.bottom;
+
+// Parse the date / time
+var parseDate = d3.time.format("%d-%b-%y").parse;
+
+// Set the ranges
+var x = d3.time.scale().range([0, width]);
+var y = d3.scale.linear().range([height, 0]);
+
+// Define the axes
+var xAxis = d3.svg.axis().scale(x)
+    .orient("bottom").ticks(5);
+
+var yAxis = d3.svg.axis().scale(y)
+    .orient("left").ticks(5);
+
+// Define the line
+var valueline = d3.svg.line()
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.close); });
+    
+// Adds the svg canvas
+var chart = d3.select("#chart")
+    .append("svg")
+    .attr("width","630px")
+    .attr("height","1000px")
+    .append("g")
+    .attr("transform", 
+              "translate(" + 50 + "," + 100 + ")");
+
+// Get the data
+d3.csv("data.csv", function(error, data) {
+    data.forEach(function(d) {
+        d.date = parseDate(d.date);
+        d.close = +d.close;
+    });
+
+    // Scale the range of the data
+    x.domain(d3.extent(data, function(d) { return d.date; }));
+    y.domain([0, d3.max(data, function(d) { return d.close; })]);
+
+    // Add the valueline path.
+    chart.append("path")
+        .attr("class", "line")
+        .attr("d", valueline(data));
+
+    // Add the X Axis
+    chart.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    // Add the Y Axis
+    chart.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+
+});
+</script>
+	<script src="main.js"></script>
+</body>
